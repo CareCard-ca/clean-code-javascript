@@ -1,4 +1,4 @@
-# clean-code-javascript
+# clean-code-javascript-guide
 
 ## Table of Contents
 
