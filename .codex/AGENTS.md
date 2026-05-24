@@ -42,6 +42,8 @@ These instructions apply to the whole workspace. The workspace is a collection o
 - Work from the specific project directory you are changing, such as `api-auth`, `api-contact-us`, `api-institutions`, `pkg-common-util`, or `app-dashboard`.
 - Check local status inside the affected project before editing. These directories are independent Git repositories.
 - Do not revert or overwrite changes you did not make.
+- Always ignore `.DS_Store`; do not stage or commit it. Keep it covered by `.gitignore` in every repository.
+- When updating a repository, adding a feature, fixing a bug, or making any other significant change, update the relevant `.agents` skill and documentation in the same change so repository guidance stays current.
 - Before finishing a code change, run the relevant tests and lint/format checks for the affected project.
 - Before finalizing any response after code changes, run all validation commands required by the affected repository. This includes relevant package scripts, all commands in `.husky` hooks, and all scripts or documented validation commands in `.junie`.
 - When a project has a `.junie` directory, read the applicable `.junie` guidance for that repository before editing. Before the final response, run every executable script in `.junie` and every validation/test command explicitly documented there. Fix any issues those commands report before finalizing.
@@ -92,7 +94,9 @@ The `pkg-*` directories are reusable CareCard packages. Shared API response, err
 
 - Write or update tests before implementation whenever changing behavior.
 - Testing is mandatory before finalizing code changes. Do not stop after implementation if tests, `.junie`, or `.husky` checks remain unrun.
+- Code coverage percentage must not decrease from the previous commit; it can stay the same or increase.
 - Keep tests readable and domain-specific. Prefer explicit helper names over generic test utilities that hide important behavior.
+- Tests must cover desired or happy paths and prevention or rejection of undesired behavior.
 - Use existing test frameworks and layouts:
   - JavaScript `api-*`: usually Mocha, Supertest, `test/index.test.js`, and Docker-backed Postgres scripts.
   - TypeScript `api-*`: usually Jest and `tests/index.test.ts`.
