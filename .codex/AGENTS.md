@@ -8,7 +8,7 @@ must not change the rules for this repository.
 
 ## Embedded Workspace Instructions
 
-These instructions apply to the whole workspace. The workspace is a collection of independent repositories, not one monorepo. Treat each `api-*`, `pkg-*`, and `app-dashboard` directory as its own project with its own package scripts, Git status, and test commands.
+These instructions apply to the whole workspace. The workspace is a collection of independent repositories, not one monorepo. Treat each `ms-*`, `pkg-*`, and `app-dashboard` directory as its own project with its own package scripts, Git status, and test commands.
 
 ### Non-Negotiable Instructions
 
@@ -39,7 +39,7 @@ These instructions apply to the whole workspace. The workspace is a collection o
 
 ### Repo Workflow
 
-- Work from the specific project directory you are changing, such as `api-auth`, `api-contact-us`, `api-institutions`, `pkg-common-util`, or `app-dashboard`.
+- Work from the specific project directory you are changing, such as `ms-auth`, `ms-contact-us`, `ms-institutions`, `pkg-common-util`, or `app-dashboard`.
 - Check local status inside the affected project before editing. These directories are independent Git repositories.
 - Do not revert or overwrite changes you did not make.
 - Do not amend existing commits unless the user explicitly asks for an amend. If hooks, formatting, validation, docs, skills, or follow-up review create additional changes after a commit already exists, make a new commit instead.
@@ -54,7 +54,7 @@ These instructions apply to the whole workspace. The workspace is a collection o
 
 ### Backend Microservices
 
-The `api-*` directories are independent Express/Postgres backend services. Most JavaScript services use CommonJS, Mocha, Supertest, Docker Compose database tests, `@carecard/*` packages, and `sub-apps` controller/router/model patterns. TypeScript services such as `api-contact-us` and `api-template-ts` use Jest or TypeScript tooling and should keep their existing TS style.
+The `ms-*` directories are independent Express/Postgres backend services. Most JavaScript services use CommonJS, Mocha, Supertest, Docker Compose database tests, `@carecard/*` packages, and `sub-apps` controller/router/model patterns. TypeScript services such as `ms-contact-us` and `ms-template-ts` use Jest or TypeScript tooling and should keep their existing TS style.
 
 - Keep service-specific controllers thin. Controllers should read as a clear workflow: parse input, authorize, validate, call domain/model logic, build response, and pass errors to `next`.
 - Extract multiline chunks into descriptively named functions in the appropriate `controllerLib`, `commonLib`, `sub-apps/lib`, model helper, or shared `pkg-*` package.
@@ -73,7 +73,7 @@ The `pkg-*` directories are reusable CareCard packages. Shared API response, err
 
 - Prefer `@carecard/common-util`, `@carecard/auth-util`, `@carecard/jwt-read`, and `@carecard/validate` over duplicated local implementations.
 - For API responses and errors, use the standardized `@carecard/common-util` behavior where possible: `requestContext`, `sendResponse`, `createError`, `notFound404`, `appErrorHandler`, error throw helpers, case converters, and `ApiErrorType`.
-- Do not create or maintain duplicated common response/error helpers inside each `api-*` service. If a reusable capability is missing, add it to the correct `pkg-*` package and update callers.
+- Do not create or maintain duplicated common response/error helpers inside each `ms-*` service. If a reusable capability is missing, add it to the correct `pkg-*` package and update callers.
 - Keep service-local response code limited to service-specific mapping or wiring.
 - Preserve the standard response shape expected by the dashboard: `success`, `status`, `statusCode`, `code`, `message`, `data`, `error`, `details`, and `meta`.
 - Include request/correlation context where available through `requestId`, `traceId`, and `meta`.
@@ -99,8 +99,8 @@ The `pkg-*` directories are reusable CareCard packages. Shared API response, err
 - Keep tests readable and domain-specific. Prefer explicit helper names over generic test utilities that hide important behavior.
 - Tests must cover desired or happy paths and prevention or rejection of undesired behavior.
 - Use existing test frameworks and layouts:
-  - JavaScript `api-*`: usually Mocha, Supertest, `test/index.test.js`, and Docker-backed Postgres scripts.
-  - TypeScript `api-*`: usually Jest and `tests/index.test.ts`.
+  - JavaScript `ms-*`: usually Mocha, Supertest, `test/index.test.js`, and Docker-backed Postgres scripts.
+  - TypeScript `ms-*`: usually Jest and `tests/index.test.ts`.
   - `pkg-*`: Mocha plus TypeScript type tests where present.
   - `app-dashboard`: Vitest, React Testing Library, mock API tests, and Selenium for end-to-end flows.
 - For database tests, use existing seed, migration, rollback, and cleanup patterns. Keep tests isolated and make cleanup reliable even after failures.
@@ -110,7 +110,7 @@ The `pkg-*` directories are reusable CareCard packages. Shared API response, err
 
 ### Dashboard Frontend
 
-`app-dashboard` is a Next.js App Router TypeScript app using MUI, React Query, `next-intl`, and shared CareCard utilities. It consumes `api-auth`, `api-institutions`, `api-contact-us`, and `api-user-profiles` through service modules.
+`app-dashboard` is a Next.js App Router TypeScript app using MUI, React Query, `next-intl`, and shared CareCard utilities. It consumes `ms-auth`, `ms-institutions`, `ms-contact-us`, and `ms-user-profiles` through service modules.
 
 - Keep backend URL definitions centralized in `src/services/api.routes.ts`.
 - Keep fetch behavior centralized in `src/services/common/api`, especially `appFetch`, `api.client`, and `parseApiResponse`.
@@ -124,9 +124,16 @@ The `pkg-*` directories are reusable CareCard packages. Shared API response, err
 ### Dependency And Version Guidance
 
 - Keep CareCard package usage consistent with the service being changed.
-- When standardizing response/error behavior, prefer `@carecard/common-util` `3.1.15` because it contains response and error functions aligned with `api-auth`.
+- When standardizing response/error behavior, prefer `@carecard/common-util` `3.1.15` because it contains response and error functions aligned with `ms-auth`.
 - If package version changes are required, update lockfiles and verify affected services.
 - Avoid broad dependency upgrades as part of feature or refactor work unless the task is specifically about dependencies.
+
+### Auth Service RLS Contract
+
+- `ms-auth` owns the auth database boundary. Its `carecard.users`, `carecard.tokens`, `carecard.visitors`, and `carecard.permissions` tables use forced PostgreSQL RLS.
+- Normal JWT users can access only self-owned auth rows. A JWT payload containing `roles: ["ad"]` is the auth-service super-admin signal.
+- Login, registration, confirmation, recovery, visitor creation, and service user lookup use narrow `ms-auth` system contexts instead of privileged runtime database queries.
+- Other repositories should verify `ms-auth` JWTs and keep their own row visibility in their own service RLS.
 
 ### Security Requirements
 
