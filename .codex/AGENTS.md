@@ -42,6 +42,7 @@ These instructions apply to the whole workspace. The workspace is a collection o
 - Work from the specific project directory you are changing, such as `api-auth`, `api-contact-us`, `api-institutions`, `pkg-common-util`, or `app-dashboard`.
 - Check local status inside the affected project before editing. These directories are independent Git repositories.
 - Do not revert or overwrite changes you did not make.
+- Do not amend existing commits unless the user explicitly asks for an amend. If hooks, formatting, validation, docs, skills, or follow-up review create additional changes after a commit already exists, make a new commit instead.
 - Always ignore `.DS_Store`; do not stage or commit it. Keep it covered by `.gitignore` in every repository.
 - When updating a repository, adding a feature, fixing a bug, or making any other significant change, update the relevant `.agents` skill and documentation in the same change so repository guidance stays current.
 - Before finishing a code change, run the relevant tests and lint/format checks for the affected project.
